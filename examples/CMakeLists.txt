@@ -1,0 +1,20 @@
+add_executable(graphiti_module graphiti_module.cpp)
+target_link_libraries(graphiti_module PRIVATE Graphiti::graphiti emp-tool::emp-tool)
+if(BUILD_TESTING)
+  find_package(Python3 COMPONENTS Interpreter)
+  if(Python3_Interpreter_FOUND)
+    foreach(mode nph rss3 generic)
+      set(backend ${mode})
+      set(extra)
+      if(mode STREQUAL "generic")
+        set(backend nph)
+        set(extra generic)
+      endif()
+      add_test(NAME graphiti_module_${mode}
+        COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/test/run_graphiti_module.py
+                $<TARGET_FILE:graphiti_module> ${backend} 17300 ${extra})
+      set_tests_properties(graphiti_module_${mode} PROPERTIES
+        TIMEOUT 55 RESOURCE_LOCK graphiti_module_ports)
+    endforeach()
+  endif()
+endif()
